@@ -1,0 +1,76 @@
+controller:
+  serviceType: NodePort
+  JCasC:
+    security:
+      approvedSignatures:
+      - "method groovy.lang.GroovyObject getProperty java.lang.String"
+      - "method groovy.util.XmlSlurper parseText java.lang.String"
+      - "method groovy.util.slurpersupport.GPathResult text"
+      - "new groovy.util.XmlSlurper"
+      - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.util.regex.Matcher"
+  
+persistence:
+  enabled: true
+  existingClaim: jenkins-pv-claim
+  storageClass: "local-storage"
+  provisioner: "kubernetes.io/no-provisioner"
+  volumeBindingMode: "WaitForFirstConsumer"
+  accessMode: "ReadWriteOnce"
+  size: "10Gi"
+  pv:
+    name: "jenkins-pv-volume"
+    labels:
+      type: local
+    path: "/mnt"
+    nodeAffinity:
+      key: "kubernetes.io/hostname"
+      value: "minikube-m02"
+  pvc:
+    name: "jenkins-pv-claim"
+  annotations: {}
+  labels: {}
+  volumes:
+  - name: gitlab-cert
+    secret:
+      secretName: gitlab-certificate
+  mounts:
+  - name: gitlab-cert
+    mountPath: /etc/gitlab/certs
+
+agent:
+  podTemplates:
+    kube-agent: |
+      - name: jenkins-maven-dind
+        label: jenkins-agent
+        serviceAccount: jenkins
+        namespace: jenkins
+        inheritFrom: "default"
+        containers:
+          - name: maven
+            image: maven:3.8.7-openjdk-18-slim
+            command: "sleep"
+            args: "99d"
+            ttyEnabled: true
+            resourceRequestCpu: "400m"
+            resourceRequestMemory: "512Mi"
+            resourceLimitCpu: "1"
+            resourceLimitMemory: "1024Mi"
+          - name: docker
+            image: docker:dind
+            command: "/bin/sh"
+            args:
+              - c
+              - dockerd-entrypoint.sh dockerd 
+              - '--host=unix:///var/run/docker.sock'
+              - '--host=tcp://0.0.0.0:2375'         
+            ttyEnabled: true
+            privileged: true
+            resourceRequestCpu: "400m"
+            resourceRequestMemory: "512Mi"
+            resourceLimitCpu: "1"
+            resourceLimitMemory: "1024Mi"
+        volumes:
+        - hostPathVolume:
+            hostPath: "/etc/docker"
+            mountPath: "/etc/docker"
+            readOnly: false
