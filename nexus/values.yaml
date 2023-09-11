@@ -1,2 +1,6 @@
 service:
   type: NodePort
+  nodePort: 32002
+  docker:
+    port: 8082
+    nodePort: 32003

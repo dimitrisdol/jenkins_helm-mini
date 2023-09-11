@@ -1,13 +1,15 @@
 controller:
   serviceType: NodePort
-  JCasC:
-    security:
-      approvedSignatures:
-      - "method groovy.lang.GroovyObject getProperty java.lang.String"
-      - "method groovy.util.XmlSlurper parseText java.lang.String"
-      - "method groovy.util.slurpersupport.GPathResult text"
-      - "new groovy.util.XmlSlurper"
-      - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.util.regex.Matcher"
+  adminUser: "admin"
+  adminPassword: "admin"
+#  JCasC:
+#    security:
+#      approvedSignatures:
+#      - "method groovy.lang.GroovyObject getProperty java.lang.String"
+#      - "method groovy.util.XmlSlurper parseText java.lang.String"
+#      - "method groovy.util.slurpersupport.GPathResult text"
+#      - "new groovy.util.XmlSlurper"
+#      - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.util.regex.Matcher"
   
 persistence:
   enabled: true
@@ -57,12 +59,8 @@ agent:
             resourceLimitMemory: "1024Mi"
           - name: docker
             image: docker:dind
-            command: "/bin/sh"
-            args:
-              - c
-              - dockerd-entrypoint.sh dockerd 
-              - '--host=unix:///var/run/docker.sock'
-              - '--host=tcp://0.0.0.0:2375'         
+            command: "/bin/sh -c"
+            args: "dockerd-entrypoint.sh dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375"         
             ttyEnabled: true
             privileged: true
             resourceRequestCpu: "400m"

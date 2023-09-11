@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.401.2-jdk11
+FROM jenkins/jenkins:2.414.1-jdk11
 
 USER root
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
